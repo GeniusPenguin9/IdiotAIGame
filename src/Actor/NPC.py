@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-from Actor.Actor import *
+from Actor.BaseActor import *
 
 
 class NPC(BaseActor):
-    def __init__(self, name, job, money, current_location):
-        super(NPC, self).__init__(name, job, money, current_location)
+    def __init__(self, game_manager, name=None, job=None, money=None, current_location=None):
+        super(NPC, self).__init__(game_manager, name, job, money, current_location)
 
 
 class Police(NPC):
-    def __init__(self, name, money, current_location):
-        super(Police, self).__init__(name, 'Police', money, current_location)
+    def __init__(self, game_manager, name=None, money=None, current_location=None):
+        super(Police, self).__init__(game_manager, name, 'Police', money, current_location)

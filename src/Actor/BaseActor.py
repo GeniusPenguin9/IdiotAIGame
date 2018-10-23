@@ -1,18 +1,34 @@
 # -*- coding: utf-8 -*-
-from Map.MapManager import *
 
 
 class BaseActor(object):
-    def __init__(self, name, job, money, current_location):
+    def __init__(self, game_manager, name=None, job=None, money=None, current_location=None):
         self.name = name
         self.job = job
         self._money = money
         self._energy = 100
         self._full = 100
 
-        if current_location not in MapManager.node_list:
-            raise ValueError('current_location should be included in node_list')
         self._current_location = current_location
+
+        self.game_manager = game_manager
+
+    def save(self):
+        return {
+            "name": self.name,
+            "job": self.job,
+            "money": self.money,
+            "energy": self.energy,
+            "full": self.full,
+            "current_location": None if self._current_location is None else self._current_location.name}
+
+    def load(self, value):
+        self.name = value["name"]
+        self.job = value["job"]
+        self._money = value["money"]
+        self._energy = value["energy"]
+        self._full = value["full"]
+        self._current_location = self.game_manager.map_manager.find(value["current_location"])
 
     @property
     def money(self):
@@ -50,7 +66,14 @@ class BaseActor(object):
         else:
             self._full = min(self._full + change_full, 100)
 
+    @property
+    def current_location(self):
+        return self._current_location
+
     def move_location(self, next_location):
+        if self._current_location is None:
+            self._current_location = next_location
+        else:
             if next_location not in self._current_location.routes:
                 raise ValueError('you cannot move to this location')
             self._current_location = next_location
