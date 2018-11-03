@@ -5,10 +5,6 @@ from Actor.Player import *
 
 class ActorManager(object):
     def __init__(self, game_manager, player=None, npc_list=None):
-        """ initializes a npc_list
-            If no list or None is given,
-            an empty npc_list will be used
-        """
         self.game_manager = game_manager
         self.npc_list = npc_list if npc_list is not None else []
         self.player = player

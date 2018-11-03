@@ -32,3 +32,7 @@ class MapManager(object):
             node = BaseMapNode(self.game_manager)
             node.load(node_dict)
             self.node_list.append(node)
+        for node_dict in value["node_list"]:
+            node = self.find(node_dict['name'])
+            node.load_route(node_dict)
+

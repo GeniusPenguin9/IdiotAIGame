@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import sys
 
 
 class BaseActor(object):
@@ -20,15 +21,19 @@ class BaseActor(object):
             "money": self.money,
             "energy": self.energy,
             "full": self.full,
-            "current_location": None if self._current_location is None else self._current_location.name}
+            "current_location": None if self._current_location is None else self._current_location.name,
+            "actor_class": self.__class__.__name__,
+            "actor_module": self.__class__.__module__}
 
     def load(self, value):
+
         self.name = value["name"]
         self.job = value["job"]
         self._money = value["money"]
         self._energy = value["energy"]
         self._full = value["full"]
         self._current_location = self.game_manager.map_manager.find(value["current_location"])
+        self.__class__ = getattr(sys.modules[value["actor_module"]], value["actor_class"])
 
     @property
     def money(self):
@@ -37,7 +42,7 @@ class BaseActor(object):
     def add_money(self, change_money):
         if change_money is not int:
             raise ValueError('change_money should be a int object')
-        if (self._money + change_money) < 0:
+        if (self._money + change_money) < 0:s
             raise ValueError('your money is less than what you want')
         else:
             self._money += change_money
