@@ -17,7 +17,6 @@ class TestGameManager(unittest.TestCase):
         self.assertEqual(old.actor_manager.npc_list, new.actor_manager.npc_list)
 
     def test_save_game(self):
-
         old = GameManager()
 
         npc1 = NPC(old, 'Penguin', 'Penguin', 1000000000000, None)
@@ -42,7 +41,6 @@ class TestGameManager(unittest.TestCase):
         self.assertEqual(new.map_manager.node_list[0], new.actor_manager.player.current_location)
 
     def test_save_police(self):
-
         old = GameManager()
         shop = Shop(old)
         old.map_manager.node_list.append(shop)
@@ -57,7 +55,6 @@ class TestGameManager(unittest.TestCase):
         self.assertTrue(isinstance(new.map_manager.node_list[0], Shop))
 
     def test_load_complex(self):
-
         old = GameManager()
         node1 = BaseMapNode(old, "n1")
         node2 = BaseMapNode(old, "n2")
@@ -75,3 +72,5 @@ class TestGameManager(unittest.TestCase):
         new.load_game("GameFile4.txt")
         self.assertEqual(new.map_manager.node_list[0], new.map_manager.node_list[1].routes[0])
         self.assertEqual(new.map_manager.node_list[1], new.map_manager.node_list[0].routes[0])
+        self.assertEqual(old.actor_manager.npc_list[0].current_location.name,
+                         new.actor_manager.npc_list[0].current_location.name)

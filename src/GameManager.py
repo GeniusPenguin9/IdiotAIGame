@@ -18,12 +18,16 @@ class GameManager(object):
     def save(self):
         return {"actor_manager": self.actor_manager.save(), "map_manager": self.map_manager.save()}
 
-    def load(self, value):
+    def load_base_element(self, value):
         self.map_manager = MapManager(self)
-        self.map_manager.load(value["map_manager"])
+        self.map_manager.load_base_element(value["map_manager"])
 
         self.actor_manager = ActorManager(self)
-        self.actor_manager.load(value["actor_manager"])
+        self.actor_manager.load_base_element(value["actor_manager"])
+
+    def load_reference(self, value):
+        self.map_manager.load_reference(value["map_manager"])
+        self.actor_manager.load_reference(value["actor_manager"])
 
     def save_game(self, file):
         with open(os.path.join('./GameFile', file), 'w') as f:
@@ -32,4 +36,6 @@ class GameManager(object):
 
     def load_game(self, file):
         with open(os.path.join('./GameFile', file), 'r') as f:
-            self.load(json.loads(f.read()))
+            self.load_base_element(json.loads(f.read()))
+        with open(os.path.join('./GameFile', file), 'r') as f:
+            self.load_reference(json.loads(f.read()))

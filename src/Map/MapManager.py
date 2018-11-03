@@ -26,13 +26,14 @@ class MapManager(object):
                 return node
         return None
 
-    def load(self, value):
+    def load_base_element(self, value):
         self.node_list = []
         for node_dict in value["node_list"]:
             node = BaseMapNode(self.game_manager)
-            node.load(node_dict)
+            node.load_base_element(node_dict)
             self.node_list.append(node)
+
+    def load_reference(self, value):
         for node_dict in value["node_list"]:
             node = self.find(node_dict['name'])
-            node.load_route(node_dict)
-
+            node.load_reference(node_dict)

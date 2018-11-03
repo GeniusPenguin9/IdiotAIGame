@@ -25,12 +25,12 @@ class BaseMapNode(object):
             "base_map_node_module": self.__class__.__module__,
             "base_map_node_class": self.__class__.__name__}
 
-    def load(self, value):
+    def load_base_element(self, value):
         self.name = value["name"]
         self.routes = []
         self.__class__ = getattr(sys.modules[value["base_map_node_module"]], value["base_map_node_class"])
 
-    def load_route(self, value):
+    def load_reference(self, value):
         for route_name in value["routes"]:
             route = self.game_manager.map_manager.find(route_name)
             self.routes.append(route)

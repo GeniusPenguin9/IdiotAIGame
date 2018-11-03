@@ -25,15 +25,16 @@ class BaseActor(object):
             "actor_class": self.__class__.__name__,
             "actor_module": self.__class__.__module__}
 
-    def load(self, value):
-
+    def load_base_element(self, value):
         self.name = value["name"]
         self.job = value["job"]
         self._money = value["money"]
         self._energy = value["energy"]
         self._full = value["full"]
-        self._current_location = self.game_manager.map_manager.find(value["current_location"])
         self.__class__ = getattr(sys.modules[value["actor_module"]], value["actor_class"])
+
+    def load_reference(self, value):
+        self._current_location = self.game_manager.map_manager.find(value["current_location"])
 
     @property
     def money(self):
@@ -42,7 +43,7 @@ class BaseActor(object):
     def add_money(self, change_money):
         if change_money is not int:
             raise ValueError('change_money should be a int object')
-        if (self._money + change_money) < 0:s
+        if (self._money + change_money) < 0:
             raise ValueError('your money is less than what you want')
         else:
             self._money += change_money
