@@ -37,8 +37,8 @@ class TestGameManager(unittest.TestCase):
         self.assertEqual(old.map_manager.node_list[0].name, new.map_manager.node_list[0].name)
 
         self.assertEqual(old.actor_manager.player.name, new.actor_manager.player.name)
-        self.assertEqual(old.actor_manager.player.current_location.name, new.actor_manager.player.current_location.name)
-        self.assertEqual(new.map_manager.node_list[0], new.actor_manager.player.current_location)
+        self.assertEqual(old.actor_manager.player.current_location_name, new.actor_manager.player.current_location_name)
+        self.assertEqual(new.map_manager.node_list[0].name, new.actor_manager.player.current_location_name)
 
     def test_save_police(self):
         old = GameManager()
@@ -56,21 +56,47 @@ class TestGameManager(unittest.TestCase):
 
     def test_load_complex(self):
         old = GameManager()
-        node1 = BaseMapNode(old, "n1")
-        node2 = BaseMapNode(old, "n2")
-        node1.add_routes([node2])
-        node2.add_routes([node1])
-        old.map_manager.node_list = [node1, node2]
+        node1 = BaseMapNode(old, "n1", 20, 20)
+        node2 = BaseMapNode(old, "n2", 30, 40)
+        node3 = BaseMapNode(old, "n3", 0, 40)
+        old.map_manager.node_list = [node1, node2, node3]
+        route1 = BaseRoute(old, 'route1', node1, node2)
+        route2 = BaseRoute(old, 'route2', node1, node3)
+        old.map_manager.route_list = [route1, route2]
+        old.map_manager.update_node_routes()
 
         police = Police(old, "penguin")
         old.actor_manager.npc_list.append(police)
+        police.move_location(node1)
         police.move_location(node2)
-
+        with self.assertRaises(ValueError):
+            police.move_location(node3)
+        police.move_location(node1)
+        police.move_location(node3)
         old.save_game("GameFile4.txt")
 
         new = GameManager()
         new.load_game("GameFile4.txt")
-        self.assertEqual(new.map_manager.node_list[0], new.map_manager.node_list[1].routes[0])
-        self.assertEqual(new.map_manager.node_list[1], new.map_manager.node_list[0].routes[0])
-        self.assertEqual(old.actor_manager.npc_list[0].current_location.name,
-                         new.actor_manager.npc_list[0].current_location.name)
+        self.assertEqual(old.actor_manager.npc_list[0].current_location_name,
+                         new.actor_manager.npc_list[0].current_location_name)
+        self.assertEqual(new.time_manager.time_slice_count, 75)
+        pass
+
+    def test_time_manager(self):
+        old = GameManager()
+        node1 = BaseMapNode(old, "n1", 20, 20)
+        node2 = BaseMapNode(old, "n2", 30, 40)
+        node3 = BaseMapNode(old, "n3", 0, 40)
+        old.map_manager.node_list = [node1, node2, node3]
+        route1 = BaseRoute(old, 'route1', node1, node2)
+        route2 = BaseRoute(old, 'route2', node1, node3)
+        old.map_manager.route_list = [route1, route2]
+        old.map_manager.update_node_routes()
+
+        police = Police(old, "penguin")
+        old.actor_manager.npc_list.append(police)
+        police.move_location(node1)
+        police.move_location(node2)
+        self.assertEqual(police.current_location_name, "n1")
+        old.time_manager.run_time(25)
+        self.assertEqual(police.current_location_name, "n2")

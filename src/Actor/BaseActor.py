@@ -1,18 +1,52 @@
 # -*- coding: utf-8 -*-
 import sys
+import math
 
 
 class BaseActor(object):
     def __init__(self, game_manager, name=None, job=None, money=None, current_location=None):
         self.name = name
         self.job = job
-        self._money = money
-        self._energy = 100
-        self._full = 100
-
-        self._current_location = current_location
-
+        self.money = money
+        self.energy = 100
+        self.full = 100
+        self.current_location_name = None if current_location is None else current_location.name
         self.game_manager = game_manager
+
+    def add_money(self, change_money):
+        if change_money is not int:
+            raise ValueError('change_money should be a int object')
+        if (self.money + change_money) < 0:
+            raise ValueError('your money is less than what you want')
+        else:
+            self.money += change_money
+
+    def add_energy(self, change_energy):
+        if change_energy is not int:
+            raise ValueError('change_energy should be a int object')
+        if (self.energy + change_energy) < 0:
+            raise ValueError('your change_energy is less than what you want')
+        else:
+            self.energy = min(self.energy + change_energy, 100)
+
+    def add_full(self, change_full):
+        if change_full is not int:
+            raise ValueError('change_full should be a int object')
+        if (self.full + change_full) < 0:
+            raise ValueError('your change_full is less than what you want')
+        else:
+            self.full = min(self.full + change_full, 100)
+
+    def move_location(self, next_location):
+        if self.current_location_name is None:
+            self.current_location_name = next_location.name
+        else:
+            for route in self.game_manager.map_manager.route_list:
+                if self.current_location_name in route.neighbour_node_name and next_location.name in route.neighbour_node_name:
+                    self.current_location_name = next_location.name
+                    self.game_manager.time_manager.time_slice_count += math.ceil(route.length)
+                    return
+            raise ValueError('you cannot move to this location because no route is available')
 
     def save(self):
         return {
@@ -21,65 +55,18 @@ class BaseActor(object):
             "money": self.money,
             "energy": self.energy,
             "full": self.full,
-            "current_location": None if self._current_location is None else self._current_location.name,
+            "current_location_name": None if self.current_location_name is None else self.current_location_name,
             "actor_class": self.__class__.__name__,
             "actor_module": self.__class__.__module__}
 
     def load_base_element(self, value):
         self.name = value["name"]
         self.job = value["job"]
-        self._money = value["money"]
-        self._energy = value["energy"]
-        self._full = value["full"]
+        self.money = value["money"]
+        self.energy = value["energy"]
+        self.full = value["full"]
+        self.current_location_name = value['current_location_name']
         self.__class__ = getattr(sys.modules[value["actor_module"]], value["actor_class"])
 
     def load_reference(self, value):
-        self._current_location = self.game_manager.map_manager.find(value["current_location"])
-
-    @property
-    def money(self):
-        return self._money
-
-    def add_money(self, change_money):
-        if change_money is not int:
-            raise ValueError('change_money should be a int object')
-        if (self._money + change_money) < 0:
-            raise ValueError('your money is less than what you want')
-        else:
-            self._money += change_money
-
-    @property
-    def energy(self):
-        return self._energy
-
-    def add_energy(self, change_energy):
-        if change_energy is not int:
-            raise ValueError('change_energy should be a int object')
-        if (self._energy + change_energy) < 0:
-            raise ValueError('your change_energy is less than what you want')
-        else:
-            self._energy = min(self._energy + change_energy, 100)
-
-    @property
-    def full(self):
-        return self._full
-
-    def add_full(self, change_full):
-        if change_full is not int:
-            raise ValueError('change_full should be a int object')
-        if (self._full + change_full) < 0:
-            raise ValueError('your change_full is less than what you want')
-        else:
-            self._full = min(self._full + change_full, 100)
-
-    @property
-    def current_location(self):
-        return self._current_location
-
-    def move_location(self, next_location):
-        if self._current_location is None:
-            self._current_location = next_location
-        else:
-            if next_location not in self._current_location.routes:
-                raise ValueError('you cannot move to this location')
-            self._current_location = next_location
+        pass
