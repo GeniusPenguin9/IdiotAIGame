@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
-import math
+
+from Time.BaseAction import MoveAction
 
 
 class BaseActor(object):
@@ -10,7 +11,7 @@ class BaseActor(object):
         self.money = money
         self.energy = 100
         self.full = 100
-        self.current_location_name = None if current_location is None else current_location.name
+        self.current_location = None if current_location is None else current_location
         self.game_manager = game_manager
 
     def add_money(self, change_money):
@@ -38,15 +39,18 @@ class BaseActor(object):
             self.full = min(self.full + change_full, 100)
 
     def move_location(self, next_location):
-        if self.current_location_name is None:
-            self.current_location_name = next_location.name
+        if self.current_location is None:
+            self.current_location = next_location
         else:
-            for route in self.game_manager.map_manager.route_list:
-                if self.current_location_name in route.neighbour_node_name and next_location.name in route.neighbour_node_name:
-                    self.current_location_name = next_location.name
-                    self.game_manager.time_manager.time_slice_count += math.ceil(route.length)
+            for route in self.current_location.routes:
+                if self.current_location in route.neighbour_node and next_location in route.neighbour_node:
+                    self.current_location = next_location
                     return
             raise ValueError('you cannot move to this location because no route is available')
+
+    def move(self, next_location):
+        move_action = MoveAction(self.game_manager, None, self, self.current_location, next_location)
+        self.game_manager.time_manager.add_action(move_action)
 
     def save(self):
         return {
@@ -55,7 +59,8 @@ class BaseActor(object):
             "money": self.money,
             "energy": self.energy,
             "full": self.full,
-            "current_location_name": None if self.current_location_name is None else self.current_location_name,
+            "current_location_name": None if self.current_location is None else self.current_location.name,
+
             "actor_class": self.__class__.__name__,
             "actor_module": self.__class__.__module__}
 
@@ -65,8 +70,8 @@ class BaseActor(object):
         self.money = value["money"]
         self.energy = value["energy"]
         self.full = value["full"]
-        self.current_location_name = value['current_location_name']
+
         self.__class__ = getattr(sys.modules[value["actor_module"]], value["actor_class"])
 
     def load_reference(self, value):
-        pass
+        self.current_location = self.game_manager.map_manager.find_node(value['current_location_name'])

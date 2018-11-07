@@ -37,8 +37,8 @@ class TestGameManager(unittest.TestCase):
         self.assertEqual(old.map_manager.node_list[0].name, new.map_manager.node_list[0].name)
 
         self.assertEqual(old.actor_manager.player.name, new.actor_manager.player.name)
-        self.assertEqual(old.actor_manager.player.current_location_name, new.actor_manager.player.current_location_name)
-        self.assertEqual(new.map_manager.node_list[0].name, new.actor_manager.player.current_location_name)
+        self.assertEqual(old.actor_manager.player.current_location.name, new.actor_manager.player.current_location.name)
+        self.assertEqual(new.map_manager.node_list[0].name, new.actor_manager.player.current_location.name)
 
     def test_save_police(self):
         old = GameManager()
@@ -73,12 +73,13 @@ class TestGameManager(unittest.TestCase):
             police.move_location(node3)
         police.move_location(node1)
         police.move_location(node3)
+        old.time_manager.run_time(75)
         old.save_game("GameFile4.txt")
 
         new = GameManager()
         new.load_game("GameFile4.txt")
-        self.assertEqual(old.actor_manager.npc_list[0].current_location_name,
-                         new.actor_manager.npc_list[0].current_location_name)
+        self.assertEqual(old.actor_manager.npc_list[0].current_location.name,
+                         new.actor_manager.npc_list[0].current_location.name)
         self.assertEqual(new.time_manager.time_slice_count, 75)
         pass
 
@@ -96,7 +97,7 @@ class TestGameManager(unittest.TestCase):
         police = Police(old, "penguin")
         old.actor_manager.npc_list.append(police)
         police.move_location(node1)
-        police.move_location(node2)
-        self.assertEqual(police.current_location_name, "n1")
+        police.move(node2)
+        self.assertEqual(police.current_location.name, "n1")
         old.time_manager.run_time(25)
-        self.assertEqual(police.current_location_name, "n2")
+        self.assertEqual(police.current_location.name, "n2")

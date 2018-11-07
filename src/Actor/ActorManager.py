@@ -9,7 +9,7 @@ class ActorManager(object):
         self.npc_list = npc_list if npc_list is not None else []
         self.player = player
 
-    def find(self, name):
+    def find_actor(self, name):
         for npc in self.npc_list:
             if npc.name == name:
                 return npc
@@ -31,7 +31,7 @@ class ActorManager(object):
 
     def load_reference(self, value):
         for npc_dict in value["npc_list"]:
-            npc = self.find(npc_dict['name'])
+            npc = self.find_actor(npc_dict['name'])
             npc.load_reference(npc_dict)
         if value["player"] is not None:
             self.player.load_reference(value['player'])

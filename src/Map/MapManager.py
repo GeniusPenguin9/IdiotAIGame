@@ -5,16 +5,11 @@ from Map.BaseRoute import *
 
 class MapManager(object):
     def __init__(self, game_manager, node_list=None, route_list=None):
-        """ initializes a node_list
-            If no list or None is given,
-            an empty node_list will be used
-        """
         self.game_manager = game_manager
         self.node_list = node_list if node_list is not None else []
         self.route_list = route_list if route_list is not None else []
 
     def add_node(self, new_node):
-        """create a new node"""
         if isinstance(new_node, BaseMapNode):
             raise ValueError('new_node should be a BaseMapNode')
         self.node_list.append(new_node)
@@ -25,8 +20,8 @@ class MapManager(object):
     def update_node_routes(self):
         for each_node in self.node_list:
             for each_route in self.route_list:
-                if each_node.name in each_route.neighbour_node_name:
-                    each_node.routes.append(each_route.name)
+                if each_node in each_route.neighbour_node:
+                    each_node.routes.append(each_route)
 
     def save(self):
         return {"node_list": [node.save() for node in self.node_list],
