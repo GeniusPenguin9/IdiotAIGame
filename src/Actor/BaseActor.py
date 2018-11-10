@@ -1,42 +1,17 @@
 # -*- coding: utf-8 -*-
 import sys
 
-from Time.BaseAction import MoveAction
+from Time.BaseAction import MoveAction, EatAction
 
 
 class BaseActor(object):
     def __init__(self, game_manager, name=None, job=None, money=None, current_location=None):
         self.name = name
         self.job = job
-        self.money = money
-        self.energy = 100
-        self.full = 100
+        self.attribute_list = [money, 100, 100]  # money, energy, full
+        self.feasible_action_list = [MoveAction, EatAction]
         self.current_location = None if current_location is None else current_location
         self.game_manager = game_manager
-
-    def add_money(self, change_money):
-        if change_money is not int:
-            raise ValueError('change_money should be a int object')
-        if (self.money + change_money) < 0:
-            raise ValueError('your money is less than what you want')
-        else:
-            self.money += change_money
-
-    def add_energy(self, change_energy):
-        if change_energy is not int:
-            raise ValueError('change_energy should be a int object')
-        if (self.energy + change_energy) < 0:
-            raise ValueError('your change_energy is less than what you want')
-        else:
-            self.energy = min(self.energy + change_energy, 100)
-
-    def add_full(self, change_full):
-        if change_full is not int:
-            raise ValueError('change_full should be a int object')
-        if (self.full + change_full) < 0:
-            raise ValueError('your change_full is less than what you want')
-        else:
-            self.full = min(self.full + change_full, 100)
 
     def move_location(self, next_location):
         if self.current_location is None:
@@ -52,13 +27,26 @@ class BaseActor(object):
         move_action = MoveAction(self.game_manager, None, self, self.current_location, next_location)
         self.game_manager.time_manager.add_action(move_action)
 
+    def ask_for_next_action(self):
+        next_requirement = self.judge_requirement()
+        # TODO: find all the helpful ways for next_requirement
+
+    def judge_requirement(self):
+        requirement = 0
+        requirement_value = 0
+        for n in range(len(self.attribute_list)):
+            value = 100 - self.attribute_list[n]
+            if value > requirement_value:
+                requirement_value = value
+                requirement = n
+        return requirement
+
+
     def save(self):
         return {
             "name": self.name,
             "job": self.job,
-            "money": self.money,
-            "energy": self.energy,
-            "full": self.full,
+            "attribute_list": self.attribute_list
             "current_location_name": None if self.current_location is None else self.current_location.name,
 
             "actor_class": self.__class__.__name__,
@@ -67,9 +55,7 @@ class BaseActor(object):
     def load_base_element(self, value):
         self.name = value["name"]
         self.job = value["job"]
-        self.money = value["money"]
-        self.energy = value["energy"]
-        self.full = value["full"]
+        self.attribute_list = value['attribute_list']
 
         self.__class__ = getattr(sys.modules[value["actor_module"]], value["actor_class"])
 
