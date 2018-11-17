@@ -1,20 +1,23 @@
 # -*- coding: utf-8 -*-
 class BaseRoute(object):
-    def __init__(self, game_manager, name="", neighbour_node1=None, neighbour_node2=None):
+    def __init__(self, game_manager, name="", starting_node=None, end_node=None, add_attribute_list=None):
         self.game_manager = game_manager
         self.name = name
-        self.neighbour_node = [] if neighbour_node1 is None and neighbour_node2 is None else [neighbour_node1,
-                                                                                              neighbour_node2]
-        self.length = 0 if neighbour_node1 is None and neighbour_node2 is None else pow(
-            pow(neighbour_node1.location_x - neighbour_node2.location_x, 2) + pow(
-                neighbour_node1.location_y - neighbour_node2.location_y, 2), 0.5)
+        self.neighbour_node = [] if starting_node is None and end_node is None else [starting_node,
+                                                                                     end_node]
+        self.add_attribute_list = add_attribute_list
+        self.length = 0 if starting_node is None and end_node is None else pow(
+            pow(starting_node.location_x - end_node.location_x, 2) + pow(
+                starting_node.location_y - end_node.location_y, 2), 0.5)
 
     def save(self):
         return {"name": self.name, "neighbour_node_name": [node.name for node in self.neighbour_node],
+                "add_attribute_list": self.add_attribute_list,
                 "length": self.length}
 
     def load_base_element(self, value):
         self.name = value['name']
+        self.add_attribute_list = value['add_attribute_list']
         self.length = value['length']
 
     def load_reference(self, value):

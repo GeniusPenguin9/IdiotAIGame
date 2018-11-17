@@ -1,45 +1,36 @@
 # -*- coding: utf-8 -*-
 import sys
 
-from Time.BaseAction import MoveAction, EatAction
+from Time.BaseAction import MoveAction, EatAction, SleepAction
 
 
 class BaseActor(object):
-    def __init__(self, game_manager, name=None, job=None, money=None, current_location=None):
+    def __init__(self, game_manager, name=None, job=None, money=None, item_list=None, current_location=None):
         self.name = name
         self.job = job
-        self.attribute_list = [money, 100, 100]  # money, energy, full
-        self.feasible_action_list = [MoveAction, EatAction]
-        self.current_location = None if current_location is None else current_location
+        self.attribute_list = [money, 100, 100, None if current_location is None else current_location]  # money, energy, full, current_location
+        self.possible_action_list = [MoveAction, EatAction]
+        self.item_list = item_list
         self.game_manager = game_manager
 
-    def move_location(self, next_location):
-        if self.current_location is None:
-            self.current_location = next_location
-        else:
-            for route in self.current_location.routes:
-                if self.current_location in route.neighbour_node and next_location in route.neighbour_node:
-                    self.current_location = next_location
-                    return
-            raise ValueError('you cannot move to this location because no route is available')
 
-    def move(self, next_location):
+    def move(self, route):
         move_action = MoveAction(self.game_manager, None, self, self.current_location, next_location)
         self.game_manager.time_manager.add_action(move_action)
 
     def ask_for_next_action(self):
-        next_requirement = self.judge_requirement()
-        # TODO: find all the helpful ways for next_requirement
-
-    def judge_requirement(self):
-        requirement = 0
-        requirement_value = 0
-        for n in range(len(self.attribute_list)):
-            value = 100 - self.attribute_list[n]
-            if value > requirement_value:
-                requirement_value = value
-                requirement = n
-        return requirement
+        temp_choice=[]
+        for action in self.possible_action_list:
+            if action is MoveAction:
+                for route in self.game_manager.map_manager.route_list:
+                    value = route.add_attribute_list[0]+route.add_attribute_list[1]+route.add_attribute_list[2]
+                    if value > 0:
+                        temp_choice.append([value, action('route=' + route.name)])
+            if action is EatAction:
+                for item in self.item_list:
+                    value = item.add_attribute_list[0]+item.add_attribute_list[1]+item.add_attribute_list[2]
+                    if value > 0:
+                        temp_choice.append([value, action('item=' + item.name)])
 
 
     def save(self):
